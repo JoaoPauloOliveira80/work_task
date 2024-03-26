@@ -18,6 +18,7 @@ public class ConnectionManager {
 	private static final String TABLE_NAME = "pra_sempre_bb";
 	private static final String URL = "jdbc:mysql://localhost:3306/" + DATABASE_NAME + "?useSSL=false";
 	private static String msg = "";
+	private static final String LOGIN_TABLE_NAME = "login";
 
 	public static void createDatabaseIfNotExists() throws SQLException {
 		if (!databaseExists()) {
@@ -37,6 +38,15 @@ public class ConnectionManager {
 			msg = "A tabela já existe. Não é necessário criar novamente.";
 			utils.messageCrud(msg);
 			
+		}
+	}
+	
+	public static void createLoginIfNotExists() throws SQLException {
+		if(!LoginExists()) {
+			LoginExists();
+		}else {
+			msg = "A tabela "+LOGIN_TABLE_NAME+" já existe. Não é necessário criar novamente.";
+			utils.messageCrud(msg);
 		}
 	}
 
@@ -61,6 +71,14 @@ public class ConnectionManager {
 			return resultSet.next();
 		}
 	}
+	
+	private static boolean LoginExists() throws SQLException {
+		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+			DatabaseMetaData metaData = conn.getMetaData();
+			ResultSet resultSet = metaData.getTables(null, null, LOGIN_TABLE_NAME, null);
+			return resultSet.next();
+		}
+	}
 
 	private static void createDatabase() throws SQLException {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3306/?useSSL=false", USER, PASSWORD)) {
@@ -73,17 +91,47 @@ public class ConnectionManager {
 			}
 		}
 	}
-
-	private static void createTable() throws SQLException {
-		try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
-			String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " (" + "id INT AUTO_INCREMENT PRIMARY KEY,"
-					+ "coluna1 VARCHAR(255)," + "coluna2 VARCHAR(255)" + ")";
-			try (Statement stmt = conn.createStatement()) {
-				stmt.executeUpdate(sql);
-				
-				msg = "Tabela criada com sucesso.";
+	
+	public static void createTable() throws SQLException {
+	    try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+	        String sql = "CREATE TABLE IF NOT EXISTS " + TABLE_NAME + " ("
+	                   + "id INT AUTO_INCREMENT PRIMARY KEY,"
+	                   + "datJornada DATE,"
+	                   + "startJornada TIME,"
+	                   + "endJornada TIME,"
+	                   + "startAlmoco TIME,"
+	                   + "endAlmoco TIME,"
+	                   + "porcentagem INT"
+	                   + ")";
+	        try (Statement stmt = conn.createStatement()) {
+	            stmt.executeUpdate(sql);
+	            
+	            msg = "Tabela criada com sucesso.";
 				utils.messageCrud(msg);
-			}
-		}
+				
+	            
+	        }
+	    }
 	}
+
+
+	
+
+	public static void createLoginTable() throws SQLException {
+	    try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+	        String sql = "CREATE TABLE IF NOT EXISTS " + LOGIN_TABLE_NAME + " ("
+	                   + "id INT AUTO_INCREMENT PRIMARY KEY,"
+	                   + "nome VARCHAR(255),"
+	                   + "username VARCHAR(255),"
+	                   + "senha VARCHAR(255)"
+	                   + ")";
+	        try (Statement stmt = conn.createStatement()) {
+	            stmt.executeUpdate(sql);
+	            
+	            msg = "Tabela de login criada com sucesso.";
+				utils.messageCrud(msg);
+	        }
+	    }
+	}
+
 }

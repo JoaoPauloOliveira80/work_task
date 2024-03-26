@@ -25,7 +25,7 @@ public class JornadaDAO {
 	
 	public List<JornadaTrabalho> listarPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim) {
 		String sql = "SELECT * FROM " + BANCO_JORNADA
-				+ " WHERE datJornada >= ? AND datJornada < ? ORDER BY datJornada ASC";
+				+ " WHERE datJornada >= ? AND datJornada <= ? ORDER BY datJornada ASC";
 
 		List<JornadaTrabalho> lista = new ArrayList<>();
 

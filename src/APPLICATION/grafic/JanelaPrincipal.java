@@ -10,7 +10,6 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.sql.Connection;
 import java.sql.Date;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -18,6 +17,7 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +35,6 @@ import javax.swing.table.DefaultTableModel;
 import com.toedter.calendar.JDateChooser;
 import com.toedter.calendar.JTextFieldDateEditor;
 
-import APPLICATION.connection.ConnectionManager;
 import APPLICATION.controller.JornadaController;
 import APPLICATION.model.GeradorPDF;
 import APPLICATION.model.JornadaTrabalho;
@@ -72,11 +71,12 @@ public class JanelaPrincipal extends JFrame {
 	int selectedRow = 0;
 
 	LocalDate hoje = LocalDate.now();
-	LocalDate mesFinal = hoje.withDayOfMonth(26); // Data final do mês atual
-	LocalDate mesComeco = mesFinal.minusMonths(1).withDayOfMonth(26);
+	LocalDate mesComeco = hoje.withDayOfMonth(26); // Dia 26 do mês atual
+	LocalDate mesFinal = hoje.plusMonths(1).withDayOfMonth(25);
 
 	LocalDateTime fim = mesFinal.atStartOfDay();
 	LocalDateTime comeco = mesComeco.atStartOfDay();
+
 	private JButton btnRefresh;
 
 	public static void main(String[] args) {
@@ -103,14 +103,20 @@ public class JanelaPrincipal extends JFrame {
 	}
 
 	public JanelaPrincipal() throws ParseException, SQLException {
-		try {
-			ConnectionManager.createDatabaseIfNotExists();
-
-			// Faça o que precisa ser feito com a conexão...
-		} catch (SQLException e) {
-			System.err.println("Erro ao criar o banco de dados ou obter conexão: " + e.getMessage());
-			e.printStackTrace();
-		}
+		//data();
+		System.out.println("comeco: " + Utils.converterFormatoData(comeco));
+		
+		System.out.println("fim: " + Utils.converterFormatoData(fim));
+		
+//		try {
+//			ConnectionManager.createDatabaseIfNotExists();
+//			ConnectionManager.createLoginIfNotExists();
+//
+//			// Faça o que precisa ser feito com a conexão...
+//		} catch (SQLException e) {
+//			System.err.println("Erro ao criar o banco de dados ou obter conexão: " + e.getMessage());
+//			e.printStackTrace();
+//		}
 		setResizable(false);
 
 		this.setFocusableWindowState(true);
@@ -262,6 +268,8 @@ public class JanelaPrincipal extends JFrame {
 
 			LocalDateTime start = startDate.atStartOfDay();
 			LocalDateTime end = endDate.atStartOfDay();
+			System.out.println("start: " + start);
+			System.out.println("end:" + end);
 
 			if (startDate.isAfter(endDate)) {
 				JOptionPane.showMessageDialog(null, "A data inicial no pode ser posterior  data final.", "Erro",
@@ -312,6 +320,8 @@ public class JanelaPrincipal extends JFrame {
 				setTitle("Controle de Jornada por período " + Utils.converterFormatoData(comeco) + " - "
 						+ Utils.converterFormatoData(fim));
 				listar(comeco, fim);
+				
+				
 
 			}
 		});
@@ -342,6 +352,16 @@ public class JanelaPrincipal extends JFrame {
 		contentPane.add(btnGerarPdf);
 
 		// listarTodos();
+	}
+
+	private void data() {
+		LocalDate hoje = LocalDate.now();
+		LocalDate vigesimoSextoDiaMesAtual = hoje.withDayOfMonth(26); // Dia 26 do mês atual
+		LocalDate diaVinteCincoProximoMes = hoje.plusMonths(1).withDayOfMonth(25);
+		System.out.println("Inicio do periodo: " + vigesimoSextoDiaMesAtual);
+		
+		
+		System.out.println("Fim do periodo: " + diaVinteCincoProximoMes);
 	}
 
 	private void abrirModeloJornada(int idJornada, Date datJornada, String startJornada, String endJornada,
@@ -457,6 +477,7 @@ public class JanelaPrincipal extends JFrame {
 //		model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
 //		diasTrabalhado = 0;
 		model.fireTableDataChanged();
+		diasTrabalhado= 0;
 	}
 
 	public void tabelaAtualizada(List<JornadaTrabalho> jornadas) {
