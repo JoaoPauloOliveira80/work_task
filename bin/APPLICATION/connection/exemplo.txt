@@ -1,0 +1,55 @@
+table.addMouseListener(new MouseAdapter() {
+		    @Override
+		    public void mouseClicked(MouseEvent e) {
+		        if (e.getClickCount() == 2) {
+		            SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+
+		            selectedRow = table.getSelectedRow();
+
+		            System.out.println("Linha selecionada: " + selectedRow);
+
+		            if (selectedRow >= 0 && selectedRow < table.getRowCount() - 4) {
+		                Object idObject = table.getValueAt(selectedRow, 0);
+		                Object idPorcentagem = table.getValueAt(selectedRow, 6);
+		                Object datJornadaObject = table.getValueAt(selectedRow, 0);
+
+		                if (idObject != null && idPorcentagem != null && datJornadaObject != null) {
+		                    try {
+		                        // Convertendo os tipos de dados conforme necessário
+		                        String idJornadaString = idObject.toString();
+		                        Integer idJornada = Integer.parseInt(idJornadaString);
+
+		                        String datJornadaString = datJornadaObject.toString();
+		                        java.sql.Date datJornada = new java.sql.Date(dateFormat.parse(datJornadaString).getTime());
+
+		                        String startJornada = (String) table.getValueAt(selectedRow, 1);
+		                        String endJornada = (String) table.getValueAt(selectedRow, 2);
+		                        String startAlmoco = (String) table.getValueAt(selectedRow, 3);
+		                        String endAlmoco = (String) table.getValueAt(selectedRow, 4);
+		                        int porcentagem = Integer.parseInt(idPorcentagem.toString());
+
+		                        ModeloJornada modeloJornada = new ModeloJornada();
+
+		                        if (modeloJornada == null || !modeloJornada.isVisible()) {
+		                            // Se a instância não existe ou está fechada, criar uma nova
+		                            abrirModeloJornada(datJornada, startJornada, endJornada, startAlmoco,
+		                                    endAlmoco, porcentagem);
+
+		                            modeloJornada.setVisible(true);
+		                            setBotoesEnabled(false);
+
+		                        } else {
+		                            // Se a instância já está aberta, torná-la visível novamente
+		                            modeloJornada.setVisible(true);
+		                            modeloJornada.toFront();
+		                            setBotoesEnabled(false);
+		                        }
+
+		                    } catch (ParseException | NumberFormatException ex) {
+		                        ex.printStackTrace();
+		                    }
+		                }
+		            }
+		        }
+		    }
+		});
