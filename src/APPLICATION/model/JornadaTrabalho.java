@@ -58,12 +58,12 @@ public class JornadaTrabalho {
 		targetTimestamp.setTime(timeFormat.parse(timeString).getTime());
 	}
 
-	// converte string para date
+	
 	public void setDatJornadaFromString(String datJornadaString) throws ParseException {
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        java.util.Date utilDate = dateFormat.parse(datJornadaString);
-        this.datJornada = new Date(utilDate.getTime());
-    }
+	    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy");
+	    java.util.Date utilDate = dateFormat.parse(datJornadaString);
+	    this.datJornada = new Date(utilDate.getTime());
+	}
 
 	public Timestamp getStartJornada() {
 		return startJornada;

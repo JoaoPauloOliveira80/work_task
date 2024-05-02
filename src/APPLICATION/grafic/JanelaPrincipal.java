@@ -17,7 +17,6 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
@@ -29,6 +28,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 
@@ -66,18 +66,15 @@ public class JanelaPrincipal extends JFrame {
 	private LocalDateTime startAlmoco;
 	private LocalDateTime endAlmoco;
 	private java.sql.Date datJornada;
-	Duration resultado = Duration.ZERO;
+	private Duration resultado = Duration.ZERO;
+	
+	private String titulo;
+	
+	LocalDateTime comeco ;
+	LocalDateTime fim;
 
 	int selectedRow = 0;
-
-	LocalDate hoje = LocalDate.now();
-	LocalDate mesComeco = hoje.withDayOfMonth(26); // Dia 26 do mês atual
-	LocalDate mesFinal = hoje.plusMonths(1).withDayOfMonth(25);
-
-	LocalDateTime fim = mesFinal.atStartOfDay();
-	LocalDateTime comeco = mesComeco.atStartOfDay();
-
-	private JButton btnRefresh;
+private JButton btnRefresh;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -94,29 +91,28 @@ public class JanelaPrincipal extends JFrame {
 		});
 	}
 
-	public String getData() {
-		return Utils.converterFormatoData(comeco);
-	}
+
 
 	public JanelaPrincipal(JornadaController jornadaController) {
 		this.jornadaController = jornadaController;
 	}
 
-	public JanelaPrincipal() throws ParseException, SQLException {
-		//data();
-		System.out.println("comeco: " + Utils.converterFormatoData(comeco));
+	public JanelaPrincipal() throws ParseException, SQLException { 
 		
-		System.out.println("fim: " + Utils.converterFormatoData(fim));
 		
-//		try {
-//			ConnectionManager.createDatabaseIfNotExists();
-//			ConnectionManager.createLoginIfNotExists();
-//
-//			// Faça o que precisa ser feito com a conexão...
-//		} catch (SQLException e) {
-//			System.err.println("Erro ao criar o banco de dados ou obter conexão: " + e.getMessage());
-//			e.printStackTrace();
-//		}
+		
+		LocalDate hoje = LocalDate.now();
+		LocalDate mesComeco = hoje.withDayOfMonth(26).minusMonths(1); // Dia 26 do mês anterior
+		LocalDate mesFinal = hoje.withDayOfMonth(25).plusMonths(0); // Dia 25 do próximo mês
+
+		// Converter para LocalDateTime
+		comeco = mesComeco.atStartOfDay();
+		fim = mesFinal.atStartOfDay();
+				
+		//conectarBanco();
+//		System.out.println("comeco: " + Utils.converterFormatoData(comeco));
+//		System.out.println("Fim: "  + Utils.converterFormatoData(fim));
+		
 		setResizable(false);
 
 		this.setFocusableWindowState(true);
@@ -141,7 +137,7 @@ public class JanelaPrincipal extends JFrame {
 		});
 
 		model = new DefaultTableModel(new Object[] { "Cod. Registro", "Data", "Incio da Jornada", "Fim da Jornada",
-				"Incio do Almoo", "Fim do Almoo", "Hora diria", "Porcentagem" }, 0) {
+				"Incio do Almoo", "Fim do Almoo", "Hora diária", "Porcentagem" }, 0) {
 
 			private static final long serialVersionUID = 1L;
 
@@ -155,6 +151,9 @@ public class JanelaPrincipal extends JFrame {
 		table.getTableHeader().setResizingAllowed(false);
 		table.getTableHeader().setReorderingAllowed(false);
 		utils.centralizarDados(table);
+		table.setCellSelectionEnabled(true);
+		table.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+
 		table.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
@@ -165,7 +164,7 @@ public class JanelaPrincipal extends JFrame {
 
 					// System.out.println("Linha selecionada: " + selectedRow);
 
-					if (selectedRow >= 0 && selectedRow < table.getRowCount() - 7) {
+					if (selectedRow >= 0 && selectedRow < table.getRowCount() - 4) {
 						Object idObject = table.getValueAt(selectedRow, 0);
 						Object idPorcentagem = table.getValueAt(selectedRow, 7);
 						Object datJornadaObject = table.getValueAt(selectedRow, 1);
@@ -210,7 +209,7 @@ public class JanelaPrincipal extends JFrame {
 		contentPane.setLayout(null);
 
 		JScrollPane scrollPane = new JScrollPane(table);
-		scrollPane.setBounds(10, 50, 940, 509);
+		scrollPane.setBounds(10, 50, 952, 509);
 		contentPane.add(scrollPane);
 
 		ActionListener alterarListener = new ActionListener() {
@@ -239,56 +238,64 @@ public class JanelaPrincipal extends JFrame {
 		btnCadastrar.setBounds(148, 570, 134, 37);
 		btnCadastrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				modeloJornada = new ModeloJornada(JanelaPrincipal.this); // Passe a instância de JanelaPrincipal
+				modeloJornada = new ModeloJornada(JanelaPrincipal.this); // Passe a instncia de JanelaPrincipal
 				modeloJornada.setVisible(true);
 				modeloJornada.setSize(670, 265);
 				modeloJornada.setLocationRelativeTo(null);
 
-				// Configurar os botões na instância de ModeloJornada
+				// Configurar os botes na instncia de ModeloJornada
 				modeloJornada.configurarBotaoAlterar(alterarListener);
 				modeloJornada.configurarBotaoIncluir(incluirListener);
-				// Desabilite os botões quando o ModeloJornada estiver aberto
+				// Desabilite os botes quando o ModeloJornada estiver aberto
 				setBotoesEnabled(false);
 
-				atualizaTable();
+//				btnCadastrar.addActionListener(new ActionListener() {
+//				    public void actionPerformed(ActionEvent e) {
+//				       // addRow(); // Chama o mtodo para adicionar uma linha
+//				    }
+//				});
 
 			}
 		});
+
 
 		contentPane.add(btnCadastrar);
 
 		btnPesquisar = new JButton("Pesquisar");
 		btnPesquisar.addActionListener(e -> {
-			if (!utils.validarDatasSelecionadas(dateChooser1, dateChooser2)) {
-				return;
-			}
+		    if (!utils.validarDatasSelecionadas(dateChooser1, dateChooser2)) {
+		        return;
+		    }
 
-			LocalDate startDate = dateChooser1.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-			LocalDate endDate = dateChooser2.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		    LocalDate startDate = dateChooser1.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+		    LocalDate endDate = dateChooser2.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-			LocalDateTime start = startDate.atStartOfDay();
-			LocalDateTime end = endDate.atStartOfDay();
-			System.out.println("start: " + start);
-			System.out.println("end:" + end);
+		    LocalDateTime start = startDate.atStartOfDay();
+		    LocalDateTime end = endDate.atStartOfDay();
+		    System.out.println("start: " + start);
+		    System.out.println("end:" + end);
 
-			if (startDate.isAfter(endDate)) {
-				JOptionPane.showMessageDialog(null, "A data inicial no pode ser posterior  data final.", "Erro",
-						JOptionPane.ERROR_MESSAGE);
-				return;
-			}
-			limparTabela();
-			listar(start, end);
+		    if (startDate.isAfter(endDate)) {
+		        JOptionPane.showMessageDialog(null, "A data inicial não pode ser posterior à data final.", "Erro",
+		                JOptionPane.ERROR_MESSAGE);
+		        return;
+		    }
+		    limparTabela();
+		    listar(start, end);
 
-			LocalDate dataAtual = LocalDate.now();
+		    LocalDate dataAtual = LocalDate.now();
 
-			@SuppressWarnings("unused")
-			boolean mesAnterior = startDate.isBefore(dataAtual)
-					&& startDate.getMonthValue() == dataAtual.getMonthValue();
+		    @SuppressWarnings("unused")
+		    boolean mesAnterior = startDate.isBefore(dataAtual)
+		            && startDate.getMonthValue() == dataAtual.getMonthValue();
 
-			setTitle("Controle de Jornada por período " + Utils.converterFormatoData(start) + " - "
-					+ Utils.converterFormatoData(end));
-
+		    setTitle("Controle de Jornada por período " + Utils.converterFormatoData(start) + " - "
+		            + Utils.converterFormatoData(end));
+		    
+		    titulo = Utils.converterFormatoData(start) + " - " +
+		             Utils.converterFormatoData(fim);
 		});
+
 
 		btnPesquisar.setBounds(349, 11, 134, 31);
 		contentPane.add(btnPesquisar);
@@ -328,7 +335,7 @@ public class JanelaPrincipal extends JFrame {
 		btnRefresh.setBounds(505, 11, 89, 31);
 		contentPane.add(btnRefresh);
 
-		String titulo = Utils.converterFormatoData(comeco);
+		titulo = getTitulo();
 
 		btnGerarPdf = new JButton("Gerar pdf");
 		btnGerarPdf.addActionListener(new ActionListener() {
@@ -345,6 +352,8 @@ public class JanelaPrincipal extends JFrame {
 				// Criar uma instância de GeradorPDF e gerar o PDF
 				GeradorPDF geradorPDF = new GeradorPDF();
 				geradorPDF.gerarPDF(titulo, titulosColunas, dados);
+				
+				
 			}
 		});
 
@@ -353,16 +362,25 @@ public class JanelaPrincipal extends JFrame {
 
 		// listarTodos();
 	}
+	
+//	private void conectarBanco() {
+//		try {
+//			ConnectionManager.createDatabaseIfNotExists();
+//			ConnectionManager.createLoginIfNotExists();
+//
+//			// Faça o que precisa ser feito com a conexão...
+//		} catch (SQLException e) {
+//			System.err.println("Erro ao criar o banco de dados ou obter conexão: " + e.getMessage());
+//			e.printStackTrace();
+//		}
+//		
+//	}
 
-	private void data() {
-		LocalDate hoje = LocalDate.now();
-		LocalDate vigesimoSextoDiaMesAtual = hoje.withDayOfMonth(26); // Dia 26 do mês atual
-		LocalDate diaVinteCincoProximoMes = hoje.plusMonths(1).withDayOfMonth(25);
-		System.out.println("Inicio do periodo: " + vigesimoSextoDiaMesAtual);
-		
-		
-		System.out.println("Fim do periodo: " + diaVinteCincoProximoMes);
+	public String getTitulo() {
+		return Utils.converterFormatoData(comeco);
 	}
+
+	
 
 	private void abrirModeloJornada(int idJornada, Date datJornada, String startJornada, String endJornada,
 			String startAlmoco, String endAlmoco, int porcentagem) {
@@ -394,49 +412,55 @@ public class JanelaPrincipal extends JFrame {
 
 		for (JornadaTrabalho jornada : jornadas) {
 			diasTrabalhado++;
-			int idJornada = jornada.getId();
-
-			Date datJornada = jornada.getDatJornada();
-			startJornada = jornada.getStartJornada().toLocalDateTime();
-			endJornada = jornada.getEndJornada().toLocalDateTime();
-			startAlmoco = jornada.getStartAlmoco().toLocalDateTime();
-			endAlmoco = jornada.getEndAlmoco().toLocalDateTime();
 			porcentagem = jornada.getPorcentagem();
+			
+			
+				int idJornada = jornada.getId();
+				Date datJornada = jornada.getDatJornada();
+				startJornada = jornada.getStartJornada().toLocalDateTime();
+				endJornada = jornada.getEndJornada().toLocalDateTime();
+				startAlmoco = jornada.getStartAlmoco().toLocalDateTime();
+				endAlmoco = jornada.getEndAlmoco().toLocalDateTime();
+				
 
-			Duration totalJornada = Duration.between(startJornada, endJornada);
-			Duration totalAlmoco = Duration.between(startAlmoco, endAlmoco);
-			Duration tempoTrabalhado = totalJornada.minus(totalAlmoco);
-			Duration horaPadrao = Duration.ofHours(8).plusMinutes(48);
+				Duration totalJornada = Duration.between(startJornada, endJornada);
+				Duration totalAlmoco = Duration.between(startAlmoco, endAlmoco);
+				Duration tempoTrabalhado = totalJornada.minus(totalAlmoco);
+				Duration horaPadrao = Duration.ofHours(8).plusMinutes(48);
 
-			if (porcentagem == 70) {
-				hora70 = true;
-				resultado = tempoTrabalhado.minus(horaPadrao);
-				horaExtra70 = horaExtra70.plus(resultado);
+				if (porcentagem == 70) {
+					hora70 = true;
+					resultado = tempoTrabalhado.minus(horaPadrao);
+					horaExtra70 = horaExtra70.plus(resultado);
+				}
+
+				if (porcentagem == 110) {
+					hora110 = true;
+					resultado = tempoTrabalhado;
+					horaExtra110 = horaExtra110.plus(resultado);
+				}
+
+				// Verificar se a duração é zero
+				if (resultado.isZero() || resultado.isNegative()) {
+
+					// Definir "N/A" na tabela quando a duração for zero
+					model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
+							utils.formatarHora(startJornada), utils.formatarHora(endJornada),
+							utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), "N/A", porcentagem });
+				} else {
+					// Caso contrário, formatar a duração como hora:minuto e definir na tabela
+					long minutosParte = resultado.toMinutes() % 60;
+
+					String formattedDuration = String.format("%02d:%02d", resultado.toHours(), minutosParte);
+					model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
+							utils.formatarHora(startJornada), utils.formatarHora(endJornada),
+							utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), formattedDuration,
+							porcentagem });
+				}
 			}
+			
 
-			if (porcentagem == 110) {
-				hora110 = true;
-				resultado = tempoTrabalhado;
-				horaExtra110 = horaExtra110.plus(resultado);
-			}
-
-			// Verificar se a duração é zero
-			if (resultado.isZero() || resultado.isNegative()) {
-
-				// Definir "N/A" na tabela quando a duração for zero
-				model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
-						utils.formatarHora(startJornada), utils.formatarHora(endJornada),
-						utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), "N/A", porcentagem });
-			} else {
-				// Caso contrário, formatar a duração como hora:minuto e definir na tabela
-				String formattedDuration = String.format("%02d:%02d", resultado.toHours(), resultado.toMinutesPart());
-				model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
-						utils.formatarHora(startJornada), utils.formatarHora(endJornada),
-						utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), formattedDuration,
-						porcentagem });
-			}
-
-		}
+		
 
 		model.addRow(new Object[] { "***************", "***************", "**************", "***************",
 				"***************", "***************", "***************", "***************" });
@@ -475,9 +499,21 @@ public class JanelaPrincipal extends JFrame {
 //		model.addRow(
 //				new Object[] { "", "", "", "", "", "Vlr a receber 110", String.format("%.2f", valorReceber110), "" });
 //		model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
-//		diasTrabalhado = 0;
+		diasTrabalhado = 0;
 		model.fireTableDataChanged();
 		diasTrabalhado= 0;
+	}
+	
+	
+	String nomeTable = "banco_de_horas";
+	String nomeBanco = "jornadadiaria";
+	
+	public String getTable() {
+		return nomeTable;
+	}
+	
+	public String getBanco() { 
+		return nomeBanco;
 	}
 
 	public void tabelaAtualizada(List<JornadaTrabalho> jornadas) {
@@ -562,6 +598,7 @@ public class JanelaPrincipal extends JFrame {
 		btnPesquisar.setEnabled(enabled);
 		dateChooser1.setEnabled(enabled);
 		dateChooser2.setEnabled(enabled);
+		btnGerarPdf.setEnabled(enabled);
 	}
 
 	private void limparCamposData() {
@@ -636,4 +673,7 @@ public class JanelaPrincipal extends JFrame {
 		return dados;
 	}
 
+	
+
+	
 }

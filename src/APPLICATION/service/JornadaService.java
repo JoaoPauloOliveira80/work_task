@@ -35,7 +35,5 @@ public class JornadaService {
 		jornadaDAO.atualizar(jornadaTrabalho);
 	}
 
-	public Integer obterUltimoID() {
-		return jornadaDAO.obterUltimoID();
-	}
+
 }

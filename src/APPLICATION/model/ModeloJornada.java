@@ -5,11 +5,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.sql.Date;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -197,8 +197,12 @@ public class ModeloJornada extends JFrame {
 		JLabel lblNewLabel_1 = new JLabel("Cod. Registro");
 		lblNewLabel_1.setBounds(36, 42, 79, 14);
 		contentPane.add(lblNewLabel_1);
-
-		txtData.setText("2024-03-20");
+		
+		LocalDate hoje = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataFormatada = hoje.format(formatter);
+		
+		txtData.setText(dataFormatada);
 		txtStartJornada.setText("07:00");
 		txtEndJornada.setText("17:00");
 		txtStartAlmoco.setText("11:00");
@@ -208,57 +212,50 @@ public class ModeloJornada extends JFrame {
 	}
 
 	public void configurarBotaoAlterar(ActionListener alterarListener) {
-		btnAlterar.setText("Atualizar");
-		btnAlterar.setActionCommand("Atualizar");
-		btnAlterar.removeActionListener(btnAlterar.getActionListeners()[0]);
+	    btnAlterar.setText("Atualizar");
+	    btnAlterar.setActionCommand("Atualizar");
+	    btnAlterar.removeActionListener(btnAlterar.getActionListeners()[0]);
 
-		btnAlterar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				
-				
-				for (ActionListener listener : incluirListeners) {
-					listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-				}
-
-			}
-		});
+	    btnAlterar.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            // Chamar o método para atualizar a jornada de trabalho
+	            atualizarJornada();
+	            
+	            // Disparar eventos para outros ouvintes, se necessário
+	            for (ActionListener listener : incluirListeners) {
+	                listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+	            }
+	        }
+	    });
 	}
 
 	public void configurarBotaoIncluir(ActionListener incluirListener) {
-		btnAlterar.setText("Incluir");
-		btnAlterar.setActionCommand("Incluir");
-		btnAlterar.removeActionListener(btnAlterar.getActionListeners()[0]); // Remover o listener anterior
+	    btnAlterar.setText("Incluir");
+	    btnAlterar.setActionCommand("Incluir");
+	    btnAlterar.removeActionListener(btnAlterar.getActionListeners()[0]); // Remover o listener anterior
 
-		btnAlterar.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
+	    btnAlterar.addActionListener(new ActionListener() {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	            // Chamar o método para inserir a nova jornada de trabalho
+	            inserirJornada();
+	            
+	            // Habilitar os botões, etc.
+	            janela.setBotoesEnabled(true);
+	            
+	            // Disparar eventos para outros ouvintes, se necessário
+	            for (ActionListener listener : incluirListeners) {
+	                listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
+	            }
+	        }
+	    });
 
-				inserirOuAtualizarJornad();
-				janela.setBotoesEnabled(true);
-
-				try {
-					try {
-						janela = new JanelaPrincipal();
-					} catch (SQLException e1) {
-						// TODO Auto-generated catch block
-						e1.printStackTrace();
-					}
-				} catch (ParseException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-				for (ActionListener listener : incluirListeners) {
-					listener.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
-				}
-
-			}
-		});
-
-		// Adicionar o novo ouvinte lista de ouvintes
-		incluirListeners.add(incluirListener);
+	    // Adicionar o novo ouvinte à lista de ouvintes
+	    incluirListeners.add(incluirListener);
 	}
+
+
 
 	public void atualizarJornada() {
 	    try {
@@ -306,7 +303,19 @@ public class ModeloJornada extends JFrame {
 	    }
 	}
 
-
+	//formata data para yyyy-mm-dd
+	// Função para converter a data de "dd/MM/yyyy" para java.sql.Date
+    public static Date converterData(String dataOriginal) {
+        SimpleDateFormat formatoOriginal = new SimpleDateFormat("dd/MM/yyyy");
+        
+        try {
+            java.util.Date utilDate = formatoOriginal.parse(dataOriginal); // Convertendo o texto original para um objeto java.util.Date
+            return new java.sql.Date(utilDate.getTime()); // Criando um java.sql.Date a partir do java.util.Date
+        } catch (ParseException e) {
+            e.printStackTrace(); // Tratamento de exceção, caso ocorra um erro na conversão
+            return null; // Retornando null em caso de erro
+        }
+    }
 
 
 
@@ -315,7 +324,10 @@ public class ModeloJornada extends JFrame {
 		if (jornadaController != null) {
 			JornadaTrabalho jornada = new JornadaTrabalho();
 			// Coletar dados necessrios para a jornada
-			Date datJornada = Date.valueOf(txtData.getText());
+	       	String converterDate = txtData.getText();			
+	       	java.util.Date dat = converterData(converterDate);
+	       	Date datJornada = new Date(dat.getTime());
+			
 			Timestamp startJornada = Utils.converterStringParaTimestamp(txtStartJornada.getText());
 			Timestamp endJornada = Utils.converterStringParaTimestamp(txtEndJornada.getText());
 			Timestamp startAlmoco = Utils.converterStringParaTimestamp(txtStartAlmoco.getText());

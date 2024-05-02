@@ -14,8 +14,8 @@ public class ConnectionManager {
 	
 	private static final String USER = "root";
 	private static final String PASSWORD = "vertrigo";
-	private static final String DATABASE_NAME = "celular";
-	private static final String TABLE_NAME = "pra_sempre_bb";
+	private static final String DATABASE_NAME = "jornadadiaria";
+	private static final String TABLE_NAME = "banco_de_horas";
 	private static final String URL = "jdbc:mysql://localhost:3306/" + DATABASE_NAME + "?useSSL=false";
 	private static String msg = "";
 	private static final String LOGIN_TABLE_NAME = "login";

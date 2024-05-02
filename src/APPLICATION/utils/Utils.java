@@ -41,8 +41,6 @@ public class Utils {
 	public Utils() {
 		// TODO Auto-generated constructor stub
 	}
-	
-	
 
 	public Duration calcularTotalHora(Duration duracaoJornada, Duration duracaoAlmoco) {
 		Duration tempoPadrao = Duration.ofHours(8).plusMinutes(48);
@@ -109,17 +107,17 @@ public class Utils {
 
 	// FORMATADOR DE DATA
 	public static String formatarIntervalo(LocalDate inicio, LocalDate fim) {
-        // Formatando as datas
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String inicioFormatado = inicio.format(formatter);
-        String fimFormatado = fim.format(formatter);
+		// Formatando as datas
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String inicioFormatado = inicio.format(formatter);
+		String fimFormatado = fim.format(formatter);
 
-        // Construindo o intervalo
-        String intervalo = inicioFormatado + " - " + fimFormatado;
+		// Construindo o intervalo
+		String intervalo = inicioFormatado + " - " + fimFormatado;
 
-        return intervalo;
-    }
-	
+		return intervalo;
+	}
+
 	public String formatDate(java.sql.Date date) {
 		SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
 		return formatter.format(date);
@@ -206,7 +204,15 @@ public class Utils {
 		return dateFormat.format(date);
 	}
 
-	public  String converterFormatoData(LocalDate data) {
+	public static String formatarData() {
+		LocalDate hoje = LocalDate.now();
+		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+		String dataFormatada = hoje.format(formatter);
+
+		return dataFormatada;
+	}
+
+	public String converterFormatoData(LocalDate data) {
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
 		return data.format(formatter);
 	}
@@ -266,14 +272,11 @@ public class Utils {
 		dialog.setVisible(true);
 	}
 
-	
-	
 	public static java.sql.Date convertStringToSqlDate(String dateString) throws ParseException {
-	    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-	    java.util.Date utilDate = dateFormat.parse(dateString);
-	    return new java.sql.Date(utilDate.getTime());
+		SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+		java.util.Date utilDate = dateFormat.parse(dateString);
+		return new java.sql.Date(utilDate.getTime());
 	}
-
 
 	public void updateJornada(String msg) {
 		JOptionPane optionPane = new JOptionPane(msg, JOptionPane.INFORMATION_MESSAGE, JOptionPane.DEFAULT_OPTION, null,
@@ -291,17 +294,16 @@ public class Utils {
 
 		dialog.setVisible(true);
 	}
-	
-	
+
 	public LocalDateTime converteTimestampToLocalDateTime(Timestamp timestamp) {
-		return  timestamp.toLocalDateTime();
+		return timestamp.toLocalDateTime();
 	}
 
-	//margem no campo
+	// margem no campo
 	public void adicionarPaddingAoDateChooser(JDateChooser dateChooser, int padding) {
-        // Cria uma borda vazia com o tamanho do padding desejado
-        EmptyBorder border = new EmptyBorder(padding, padding, padding, padding);
-        // Define a borda no JDateChooser
-        dateChooser.setBorder(BorderFactory.createCompoundBorder(dateChooser.getBorder(), border));
-    }
+		// Cria uma borda vazia com o tamanho do padding desejado
+		EmptyBorder border = new EmptyBorder(padding, padding, padding, padding);
+		// Define a borda no JDateChooser
+		dateChooser.setBorder(BorderFactory.createCompoundBorder(dateChooser.getBorder(), border));
+	}
 }

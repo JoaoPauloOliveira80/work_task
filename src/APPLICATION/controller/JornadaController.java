@@ -38,8 +38,8 @@ public class JornadaController {
         jornadaService.atualizar(jornadaTrabalho);
     }
     
-    public Integer obterUltimoID() {
-    	return jornadaService.obterUltimoID();
-	}
+//    public Integer obterUltimoID() {
+//    	return jornadaService.obterUltimoID();
+//	}
 
 }

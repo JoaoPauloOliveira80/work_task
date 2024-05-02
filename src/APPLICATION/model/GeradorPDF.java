@@ -22,7 +22,7 @@ public class GeradorPDF {
         Document document = new Document(PageSize.A4.rotate());
 
         try {
-            PdfWriter.getInstance(document, new FileOutputStream("flavia.pdf"));
+            PdfWriter.getInstance(document, new FileOutputStream("hora110.pdf"));
             document.open();
 
             // Adicionar o título acima da primeira coluna
