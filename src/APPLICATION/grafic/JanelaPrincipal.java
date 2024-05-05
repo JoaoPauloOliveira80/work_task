@@ -40,6 +40,8 @@ import APPLICATION.model.GeradorPDF;
 import APPLICATION.model.JornadaTrabalho;
 import APPLICATION.model.ModeloJornada;
 import APPLICATION.utils.Utils;
+import javax.swing.ImageIcon;
+import java.awt.Color;
 
 public class JanelaPrincipal extends JFrame {
 
@@ -234,8 +236,11 @@ private JButton btnRefresh;
 			}
 		});
 
-		btnCadastrar = new JButton("Inserir");
-		btnCadastrar.setBounds(148, 570, 134, 37);
+		btnCadastrar = new JButton("");
+		btnCadastrar.setToolTipText("New jornada");
+		btnCadastrar.setBackground(Color.WHITE);
+		btnCadastrar.setIcon(new ImageIcon("C:\\Users\\vigjo\\OneDrive\\\u00C1rea de Trabalho\\A1-SISTEMA-JORNDA-TRABALHO\\BANCO_DE_HORA\\img\\adicionar-usuario.png"));
+		btnCadastrar.setBounds(712, 11, 57, 31);
 		btnCadastrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				modeloJornada = new ModeloJornada(JanelaPrincipal.this); // Passe a instncia de JanelaPrincipal
@@ -493,12 +498,15 @@ private JButton btnRefresh;
 		double valorReceber70 = 22.12 * horaExtra110.toHours();
 		double valorReceber110 = 28.15 * horaExtra70.toHours();
 		double totalReceber = valorReceber70 + valorReceber110;
+		
+		model.addRow(new Object[] { "", "", "", "",
+				"", "", "", "" });
 
-//		model.addRow(
-//				new Object[] { "", "", "", "", "", "Vlr a receber 70", String.format("%.2f", valorReceber70), "" });
-//		model.addRow(
-//				new Object[] { "", "", "", "", "", "Vlr a receber 110", String.format("%.2f", valorReceber110), "" });
-//		model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
+		model.addRow(
+				new Object[] { "", "", "", "", "", "Vlr a receber 70%", String.format("%.2f", valorReceber70), "" });
+		model.addRow(
+				new Object[] { "", "", "", "", "", "Vlr a receber 110%", String.format("%.2f", valorReceber110), "" });
+		model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
 		diasTrabalhado = 0;
 		model.fireTableDataChanged();
 		diasTrabalhado= 0;
@@ -558,13 +566,13 @@ private JButton btnRefresh;
 
 		if (hora70) {
 			model.addRow(
-					new Object[] { "", "", "", "", "", "Hora extra 70%", utils.formatarDuration(horaExtra70), "" });
+					new Object[] { "", "", "", "", "Hora extra 70%", utils.formatarDuration(horaExtra70), "", "" });
 
 		}
 
 		if (hora110) {
 			model.addRow(
-					new Object[] { "", "", "", "", "", "Hora extra 110%", utils.formatarDuration(horaExtra110), "" });
+					new Object[] { "", "", "", "", "Hora extra 110%", utils.formatarDuration(horaExtra110), "", "" });
 
 		} else {
 			modelo.addRow(new Object[] { "", "", "", "", "", "Hora extra 110%", "00:00", "" });
