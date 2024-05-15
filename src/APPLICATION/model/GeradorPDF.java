@@ -3,6 +3,7 @@ package APPLICATION.model;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.sql.Date;
 import java.util.List;
 
 import com.itextpdf.text.Document;
@@ -18,11 +19,18 @@ import APPLICATION.utils.Utils;
 public class GeradorPDF {
     Utils utils = new Utils();
     
-    public void gerarPDF(String titulo, List<Object> titulosColunas, List<List<Object>> dados) {
+    private JornadaTrabalho jornada = new JornadaTrabalho();
+    String data =  jornada.getDatJornada().toString();
+    
+   
+    
+    public void gerarPDF(String titulo, List<Object> titulosColunas, List<List<Object>> dados, String datJornada) {
         Document document = new Document(PageSize.A4.rotate());
+        
+        String nomeArquivo = (datJornada != null) ? datJornada + ".pdf" : "Data_Indisponivel.pdf";
 
         try {
-            PdfWriter.getInstance(document, new FileOutputStream("hora110.pdf"));
+            PdfWriter.getInstance(document, new FileOutputStream(nomeArquivo));
             document.open();
 
             // Adicionar o título acima da primeira coluna
@@ -63,4 +71,5 @@ public class GeradorPDF {
             e.printStackTrace();
         }
     }
+
 }

@@ -42,6 +42,7 @@ public class ModeloJornada extends JFrame {
 	private JanelaPrincipal janela;
 	private JButton btnAlterar;
 	private JButton btnCadastro;
+	private JButton btnExcluir;
 	private JornadaController jornadaController;
 	private List<ActionListener> incluirListeners = new ArrayList<>();
 
@@ -87,6 +88,7 @@ public class ModeloJornada extends JFrame {
 	}
 
 	private void initComponents() {
+		
 		setSize(670, 265);
 		this.jornadaController = new JornadaController();
 
@@ -140,7 +142,7 @@ public class ModeloJornada extends JFrame {
 		label_2.setBounds(144, 91, 90, 18);
 		contentPane.add(label_2);
 
-		txtStartAlmoco = new PlaceholderTextField("00:00");
+		txtStartAlmoco = new PlaceholderTextField("");
 		txtStartAlmoco.setBounds(261, 119, 95, 18);
 		contentPane.add(txtStartAlmoco);
 
@@ -148,7 +150,7 @@ public class ModeloJornada extends JFrame {
 		label_3.setBounds(266, 91, 90, 18);
 		contentPane.add(label_3);
 
-		txtEndAlmoco = new PlaceholderTextField("00:00");
+		txtEndAlmoco = new PlaceholderTextField("");
 		txtEndAlmoco.setBounds(389, 119, 95, 18);
 		contentPane.add(txtEndAlmoco);
 
@@ -173,7 +175,7 @@ public class ModeloJornada extends JFrame {
 		btnAlterar.setBounds(34, 172, 269, 32);
 		contentPane.add(btnAlterar);
 
-		JButton btnExcluir = new JButton("Excluir");
+	btnExcluir = new JButton("Excluir");
 		btnExcluir.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e) {
 		        int id = janela.getID();
@@ -209,6 +211,11 @@ public class ModeloJornada extends JFrame {
 		txtEndAlmoco.setText("12:00");
 		txtPorcentagem.setText("70");
 
+	}
+	
+	public void setBotoesEnabled(boolean enabled) {
+		btnExcluir.setEnabled(enabled);
+		
 	}
 
 	public void configurarBotaoAlterar(ActionListener alterarListener) {

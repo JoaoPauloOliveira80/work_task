@@ -41,6 +41,8 @@ public class Utils {
 	public Utils() {
 		// TODO Auto-generated constructor stub
 	}
+	
+	
 
 	public Duration calcularTotalHora(Duration duracaoJornada, Duration duracaoAlmoco) {
 		Duration tempoPadrao = Duration.ofHours(8).plusMinutes(48);
@@ -128,9 +130,19 @@ public class Utils {
 		return data.format(formatter);
 	}
 
-	public String formatarHora(LocalDateTime dateTime) {
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-		return dateTime.format(formatter);
+//	public String formatarHora(LocalDateTime dateTime) {
+//		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+//		return dateTime.format(formatter);
+//	}
+	
+	public  String formatarHora(LocalDateTime dateTime) {
+	    if (dateTime != null) {
+	        // Formate a data e hora
+	        return dateTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+	    } else {
+	        // Retorne uma string vazia ou outra string padrão, dependendo do que for apropriado para sua aplicação
+	        return "";
+	    }
 	}
 
 	// FORMATADOR DE HORA

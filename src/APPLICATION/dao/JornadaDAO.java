@@ -11,63 +11,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import APPLICATION.connection.ConnectionDB;
-import APPLICATION.grafic.JanelaPrincipal;
 import APPLICATION.model.JornadaTrabalho;
 import APPLICATION.utils.Utils;
 
 public class JornadaDAO {
 	private Utils utils = new Utils();
 	private Connection conn = ConnectionDB.create();
-	private PreparedStatement pstm = null;
-	private ResultSet rs = null;
 	private String msg = "";
-	private JanelaPrincipal principal;
 	String table = "jornada";
-	
-	
-	
-
-//	public List<JornadaTrabalho> listarPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim) {
-//		
-//		 
-//		String sql = "SELECT * FROM " + table
-//				+ " WHERE dat_jornada >= ? AND dat_jornada <= ? ORDER BY dat_jornada ASC";
-//
-//		List<JornadaTrabalho> lista = new ArrayList<>();
-//
-//		try (Connection conn = ConnectionDB.create(); PreparedStatement pstm = conn.prepareStatement(sql)) {
-//
-//			// Verifique o estado da conexão
-//			if (conn == null || conn.isClosed()) {
-//				// Reconecte ou lide com a situação de conexão fechada.
-//				System.out.println("Conexão com o banco de dados não foi inicializada ou está fechada.");
-//				return lista;
-//			}
-//
-//			// Converte LocalDateTime para Timestamp
-//			pstm.setTimestamp(1, Timestamp.valueOf(dataInicio));
-//			pstm.setTimestamp(2, Timestamp.valueOf(dataFim));
-//
-//			try (ResultSet rs = pstm.executeQuery()) {
-//				while (rs.next()) {
-//					JornadaTrabalho jornada = new JornadaTrabalho();
-//					jornada.setId(rs.getInt("id"));
-//					jornada.setDatJornada(new java.sql.Date(rs.getTimestamp("dat_jornada").getTime()));
-//					jornada.setStartJornada(rs.getTimestamp("start_Jornada"));
-//					jornada.setEndJornada(rs.getTimestamp("end_Jornada"));
-//					jornada.setStartAlmoco(rs.getTimestamp("start_Almoco"));
-//					jornada.setEndAlmoco(rs.getTimestamp("end_Almoco"));
-//					jornada.setPorcentagem(rs.getInt("porcentagem"));
-//
-//					lista.add(jornada);
-//				}
-//			}
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		}
-//
-//		return lista;
-//	}
 
 	public List<JornadaTrabalho> listarPorPeriodo(LocalDateTime dataInicio, LocalDateTime dataFim) {
 		String sql = "SELECT * FROM " + table + " WHERE dat_jornada >= ? AND dat_jornada <= ? ORDER BY dat_jornada ASC";

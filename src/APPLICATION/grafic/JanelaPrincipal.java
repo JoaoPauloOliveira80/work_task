@@ -1,5 +1,6 @@
 package APPLICATION.grafic;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -17,10 +18,12 @@ import java.text.SimpleDateFormat;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -40,8 +43,6 @@ import APPLICATION.model.GeradorPDF;
 import APPLICATION.model.JornadaTrabalho;
 import APPLICATION.model.ModeloJornada;
 import APPLICATION.utils.Utils;
-import javax.swing.ImageIcon;
-import java.awt.Color;
 
 public class JanelaPrincipal extends JFrame {
 
@@ -70,13 +71,16 @@ public class JanelaPrincipal extends JFrame {
 	private java.sql.Date datJornada;
 	private Duration resultado = Duration.ZERO;
 	
+	private Duration tempoTrabalhado;
+    private Duration horaPadrao;
+
 	private String titulo;
-	
-	LocalDateTime comeco ;
+
+	LocalDateTime comeco;
 	LocalDateTime fim;
 
 	int selectedRow = 0;
-private JButton btnRefresh;
+	private JButton btnRefresh;
 
 	public static void main(String[] args) {
 		EventQueue.invokeLater(new Runnable() {
@@ -93,16 +97,12 @@ private JButton btnRefresh;
 		});
 	}
 
-
-
 	public JanelaPrincipal(JornadaController jornadaController) {
 		this.jornadaController = jornadaController;
 	}
 
-	public JanelaPrincipal() throws ParseException, SQLException { 
-		
-		
-		
+	public JanelaPrincipal() throws ParseException, SQLException {
+
 		LocalDate hoje = LocalDate.now();
 		LocalDate mesComeco = hoje.withDayOfMonth(26).minusMonths(1); // Dia 26 do mês anterior
 		LocalDate mesFinal = hoje.withDayOfMonth(25).plusMonths(0); // Dia 25 do próximo mês
@@ -110,11 +110,11 @@ private JButton btnRefresh;
 		// Converter para LocalDateTime
 		comeco = mesComeco.atStartOfDay();
 		fim = mesFinal.atStartOfDay();
-				
-		//conectarBanco();
+
+		// conectarBanco();
 //		System.out.println("comeco: " + Utils.converterFormatoData(comeco));
 //		System.out.println("Fim: "  + Utils.converterFormatoData(fim));
-		
+
 		setResizable(false);
 
 		this.setFocusableWindowState(true);
@@ -239,7 +239,8 @@ private JButton btnRefresh;
 		btnCadastrar = new JButton("");
 		btnCadastrar.setToolTipText("New jornada");
 		btnCadastrar.setBackground(Color.WHITE);
-		btnCadastrar.setIcon(new ImageIcon("C:\\Users\\vigjo\\OneDrive\\\u00C1rea de Trabalho\\A1-SISTEMA-JORNDA-TRABALHO\\BANCO_DE_HORA\\img\\adicionar-usuario.png"));
+		btnCadastrar.setIcon(new ImageIcon(
+				"C:\\Users\\vigjo\\OneDrive\\\u00C1rea de Trabalho\\A1-SISTEMA-JORNDA-TRABALHO\\BANCO_DE_HORA\\img\\adicionar-usuario.png"));
 		btnCadastrar.setBounds(712, 11, 57, 31);
 		btnCadastrar.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -253,54 +254,47 @@ private JButton btnRefresh;
 				modeloJornada.configurarBotaoIncluir(incluirListener);
 				// Desabilite os botes quando o ModeloJornada estiver aberto
 				setBotoesEnabled(false);
-
-//				btnCadastrar.addActionListener(new ActionListener() {
-//				    public void actionPerformed(ActionEvent e) {
-//				       // addRow(); // Chama o mtodo para adicionar uma linha
-//				    }
-//				});
+				
+				modeloJornada.setBotoesEnabled(false);
 
 			}
 		});
-
 
 		contentPane.add(btnCadastrar);
 
 		btnPesquisar = new JButton("Pesquisar");
 		btnPesquisar.addActionListener(e -> {
-		    if (!utils.validarDatasSelecionadas(dateChooser1, dateChooser2)) {
-		        return;
-		    }
+			if (!utils.validarDatasSelecionadas(dateChooser1, dateChooser2)) {
+				return;
+			}
 
-		    LocalDate startDate = dateChooser1.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-		    LocalDate endDate = dateChooser2.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			LocalDate startDate = dateChooser1.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+			LocalDate endDate = dateChooser2.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-		    LocalDateTime start = startDate.atStartOfDay();
-		    LocalDateTime end = endDate.atStartOfDay();
-		    System.out.println("start: " + start);
-		    System.out.println("end:" + end);
+			LocalDateTime start = startDate.atStartOfDay();
+			LocalDateTime end = endDate.atStartOfDay();
+			System.out.println("start: " + start);
+			System.out.println("end:" + end);
 
-		    if (startDate.isAfter(endDate)) {
-		        JOptionPane.showMessageDialog(null, "A data inicial não pode ser posterior à data final.", "Erro",
-		                JOptionPane.ERROR_MESSAGE);
-		        return;
-		    }
-		    limparTabela();
-		    listar(start, end);
+			if (startDate.isAfter(endDate)) {
+				JOptionPane.showMessageDialog(null, "A data inicial não pode ser posterior à data final.", "Erro",
+						JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			limparTabela();
+			listar(start, end);
 
-		    LocalDate dataAtual = LocalDate.now();
+			LocalDate dataAtual = LocalDate.now();
 
-		    @SuppressWarnings("unused")
-		    boolean mesAnterior = startDate.isBefore(dataAtual)
-		            && startDate.getMonthValue() == dataAtual.getMonthValue();
+			@SuppressWarnings("unused")
+			boolean mesAnterior = startDate.isBefore(dataAtual)
+					&& startDate.getMonthValue() == dataAtual.getMonthValue();
 
-		    setTitle("Controle de Jornada por período " + Utils.converterFormatoData(start) + " - "
-		            + Utils.converterFormatoData(end));
-		    
-		    titulo = Utils.converterFormatoData(start) + " - " +
-		             Utils.converterFormatoData(fim);
+			setTitle("Controle de Jornada por período " + Utils.converterFormatoData(start) + " - "
+					+ Utils.converterFormatoData(end));
+
+			titulo = Utils.converterFormatoData(start) + " - " + Utils.converterFormatoData(fim);
 		});
-
 
 		btnPesquisar.setBounds(349, 11, 134, 31);
 		contentPane.add(btnPesquisar);
@@ -332,8 +326,6 @@ private JButton btnRefresh;
 				setTitle("Controle de Jornada por período " + Utils.converterFormatoData(comeco) + " - "
 						+ Utils.converterFormatoData(fim));
 				listar(comeco, fim);
-				
-				
 
 			}
 		});
@@ -356,9 +348,8 @@ private JButton btnRefresh;
 
 				// Criar uma instância de GeradorPDF e gerar o PDF
 				GeradorPDF geradorPDF = new GeradorPDF();
-				geradorPDF.gerarPDF(titulo, titulosColunas, dados);
-				
-				
+				geradorPDF.gerarPDF(titulo, titulosColunas, dados, datJornada.toString());
+
 			}
 		});
 
@@ -367,25 +358,10 @@ private JButton btnRefresh;
 
 		// listarTodos();
 	}
-	
-//	private void conectarBanco() {
-//		try {
-//			ConnectionManager.createDatabaseIfNotExists();
-//			ConnectionManager.createLoginIfNotExists();
-//
-//			// Faça o que precisa ser feito com a conexão...
-//		} catch (SQLException e) {
-//			System.err.println("Erro ao criar o banco de dados ou obter conexão: " + e.getMessage());
-//			e.printStackTrace();
-//		}
-//		
-//	}
 
 	public String getTitulo() {
 		return Utils.converterFormatoData(comeco);
 	}
-
-	
 
 	private void abrirModeloJornada(int idJornada, Date datJornada, String startJornada, String endJornada,
 			String startAlmoco, String endAlmoco, int porcentagem) {
@@ -411,116 +387,274 @@ private JButton btnRefresh;
 	int diasTrabalhado = 0;
 	private JButton btnGerarPdf;
 
-	public void listar(LocalDateTime startDate, LocalDateTime endDate) {
-		limparTabela();
-		List<JornadaTrabalho> jornadas = jornadaController.listarPorPeriodo(startDate, endDate);
-
-		for (JornadaTrabalho jornada : jornadas) {
-			diasTrabalhado++;
-			porcentagem = jornada.getPorcentagem();
-			
-			
-				int idJornada = jornada.getId();
-				Date datJornada = jornada.getDatJornada();
-				startJornada = jornada.getStartJornada().toLocalDateTime();
-				endJornada = jornada.getEndJornada().toLocalDateTime();
-				startAlmoco = jornada.getStartAlmoco().toLocalDateTime();
-				endAlmoco = jornada.getEndAlmoco().toLocalDateTime();
-				
-
-				Duration totalJornada = Duration.between(startJornada, endJornada);
-				Duration totalAlmoco = Duration.between(startAlmoco, endAlmoco);
-				Duration tempoTrabalhado = totalJornada.minus(totalAlmoco);
-				Duration horaPadrao = Duration.ofHours(8).plusMinutes(48);
-
-				if (porcentagem == 70) {
-					hora70 = true;
-					resultado = tempoTrabalhado.minus(horaPadrao);
-					horaExtra70 = horaExtra70.plus(resultado);
-				}
-
-				if (porcentagem == 110) {
-					hora110 = true;
-					resultado = tempoTrabalhado;
-					horaExtra110 = horaExtra110.plus(resultado);
-				}
-
-				// Verificar se a duração é zero
-				if (resultado.isZero() || resultado.isNegative()) {
-
-					// Definir "N/A" na tabela quando a duração for zero
-					model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
-							utils.formatarHora(startJornada), utils.formatarHora(endJornada),
-							utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), "N/A", porcentagem });
-				} else {
-					// Caso contrário, formatar a duração como hora:minuto e definir na tabela
-					long minutosParte = resultado.toMinutes() % 60;
-
-					String formattedDuration = String.format("%02d:%02d", resultado.toHours(), minutosParte);
-					model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
-							utils.formatarHora(startJornada), utils.formatarHora(endJornada),
-							utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), formattedDuration,
-							porcentagem });
-				}
-			}
-			
-
-		
-
-		model.addRow(new Object[] { "***************", "***************", "**************", "***************",
-				"***************", "***************", "***************", "***************" });
-
-		if (hora70) {
-			model.addRow(new Object[] { "", "", "", "", "", "Hr 70%", utils.formatarDuration(horaExtra70), "" });
-
-		}
-
-		if (hora110) {
-			model.addRow(new Object[] { "", "", "", "", "", "Hr 110%", utils.formatarDuration(horaExtra110), "" });
-
-		} else {
-			model.addRow(new Object[] { "", "", "", "", "", "Hr 110%", "00:00", "" });
-
-		}
-		Duration totalHora = Duration.ZERO;
-
-		totalHora = horaExtra110.plus(horaExtra70);
-
-		String msg = "";
-		if (diasTrabalhado > 1) {
-			msg = " dias";
-		} else {
-			msg = " dia";
-		}
-
-		model.addRow(new Object[] { "Dias trabalhado", diasTrabalhado + msg, "", "", "", "Total hora",
-				utils.formatarDuration(totalHora), "" });
-		double valorReceber70 = 22.12 * horaExtra110.toHours();
-		double valorReceber110 = 28.15 * horaExtra70.toHours();
-		double totalReceber = valorReceber70 + valorReceber110;
-		
-		model.addRow(new Object[] { "", "", "", "",
-				"", "", "", "" });
-
-		model.addRow(
-				new Object[] { "", "", "", "", "", "Vlr a receber 70%", String.format("%.2f", valorReceber70), "" });
-		model.addRow(
-				new Object[] { "", "", "", "", "", "Vlr a receber 110%", String.format("%.2f", valorReceber110), "" });
-		model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
-		diasTrabalhado = 0;
-		model.fireTableDataChanged();
-		diasTrabalhado= 0;
+	public String returnPeriodo() {
+		return datJornada.toString();
 	}
-	
-	
+
+	public void listar(LocalDateTime startDate, LocalDateTime endDate) {
+	    limparTabela();
+	    List<JornadaTrabalho> jornadas = jornadaController.listarPorPeriodo(startDate, endDate);
+
+	    for (JornadaTrabalho jornada : jornadas) {
+	        diasTrabalhado++;
+	        porcentagem = jornada.getPorcentagem();
+
+	        int idJornada = jornada.getId();
+	        datJornada = jornada.getDatJornada();
+	        startJornada = jornada.getStartJornada().toLocalDateTime();
+	        endJornada = jornada.getEndJornada().toLocalDateTime();
+
+	        // Verifica se o horário de almoço não é nulo antes de convertê-lo para
+	        // LocalDateTime
+	        if (jornada.getStartAlmoco() != null && jornada.getEndAlmoco() != null) {
+	            startAlmoco = jornada.getStartAlmoco().toLocalDateTime();
+	            endAlmoco = jornada.getEndAlmoco().toLocalDateTime();
+	        } else {
+	            // Lógica para lidar com o caso em que o horário de almoço é nulo
+	            startAlmoco = null; // ou outro valor adequado
+	            endAlmoco = null; // ou outro valor adequado
+	        }
+
+	        // Verifica se startJornada e endJornada não são nulos antes de calcular a
+	        // duração
+	        
+	        Duration totalJornada2 = Duration.between(startJornada, endJornada);
+	        if (startJornada != null && endJornada != null) {
+	            // Verifica se startAlmoco e endAlmoco são nulos
+	            if (startAlmoco == null || endAlmoco == null) {
+	                // Define "N/A" nas colunas de horário de almoço
+	                model.addRow(new Object[] { 
+	                    idJornada, 
+	                    utils.converterFormatoDate(datJornada),
+	                    utils.formatarHora(startJornada), 
+	                    utils.formatarHora(endJornada), 
+	                    //The method formatarHora(LocalDateTime) in the type Utils is not applicable for the arguments (Duration)
+	                    "N/A", "N/A",  utils.formatarDuration(totalJornada2) ,
+	                    porcentagem 
+	                });
+	            } else {
+	                Duration totalJornada = Duration.between(startJornada, endJornada);
+	                Duration totalAlmoco = Duration.between(startAlmoco, endAlmoco);
+
+	                if (totalAlmoco.compareTo(Duration.ofHours(1)) > 0) {
+	                    totalAlmoco = Duration.ofHours(1);
+	                }
+	                //Revert commit
+	               tempoTrabalhado = totalJornada.minus(totalAlmoco);
+	               horaPadrao = Duration.ofHours(8).plusMinutes(48);
+
+	                if (porcentagem == 70) {
+	                    hora70 = true;
+//	                    resultado = tempoTrabalhado.minus(horaPadrao);
+//	                    horaExtra70 = horaExtra70.plus(resultado);
+	                }
+	                
+	               
+	                if (porcentagem == 110) {
+	                	resultado = Duration.ZERO;
+	                    hora110 = true;
+	                    resultado = tempoTrabalhado;
+	                    horaExtra110 = horaExtra110.plus(resultado);
+	                    
+	                    
+	                }
+
+	                if (resultado.isZero() || resultado.isNegative()) {
+	                    // Definir "N/A" na tabela quando a duração for zero
+	                    model.addRow(new Object[] { 
+	                        idJornada, 
+	                        utils.converterFormatoDate(datJornada),
+	                        utils.formatarHora(startJornada), 
+	                        utils.formatarHora(endJornada), 
+	                        utils.formatarHora(startAlmoco), 
+	                        utils.formatarHora(endAlmoco), 
+	                        "N/A",
+	                        porcentagem 
+	                    });
+	                } else {
+	                	
+	                    // Formatando a duração e adicionando à tabela
+	                    long minutosParte = resultado.toMinutes() % 60;
+	                    String  formattedDuration = String.format("%02d:%02d", resultado.toHours(), minutosParte);
+	                    model.addRow(new Object[] { 
+	                        idJornada, 
+	                        utils.converterFormatoDate(datJornada),
+	                        utils.formatarHora(startJornada), 
+	                        utils.formatarHora(endJornada),
+	                        utils.formatarHora(startAlmoco), 
+	                        utils.formatarHora(endAlmoco), 
+	                        formattedDuration,
+	                        porcentagem 
+	                    });
+	                }
+	            }
+	        }
+	    }
+	    
+	    if(hora70) {
+	    	resultado = tempoTrabalhado.minus(horaPadrao);
+            horaExtra70 = horaExtra70.plus(resultado);
+	    	
+	    }
+
+	    model.addRow(new Object[] { 
+	        "***************", "***************", "**************", "***************",
+	        "***************", "***************", "***************", "***************" 
+	    });
+
+	    if (hora70) {
+	        model.addRow(new Object[] { "", "", "", "", "", "Hr 70%", utils.formatarDuration(horaExtra70), "" });
+	    }
+
+	    if (hora110) {
+	        model.addRow(new Object[] { "", "", "", "", "", "Hr 110% total", utils.formatarDuration(horaExtra110), "" });
+	    } else {
+	        model.addRow(new Object[] { "", "", "", "", "", "Hr 110%", "00:00", "" });
+	    }
+
+	    Duration totalHora = horaExtra110.plus(horaExtra70);
+
+	    String msg = (diasTrabalhado > 1) ? " dias" : " dia";
+
+	    model.addRow(new Object[] { 
+	        "Dias trabalhado", diasTrabalhado + msg, "", "", "", "Total hora",
+	        utils.formatarDuration(totalHora), "" 
+	    });
+
+	    double valorReceber70 = 22.12 * horaExtra110.toHours();
+	    double valorReceber110 = 28.15 * horaExtra70.toHours();
+	    double totalReceber = valorReceber70 + valorReceber110;
+
+	    model.addRow(new Object[] { "", "", "", "", "", "", "", "" });
+
+	    model.addRow(new Object[] { "", "", "", "", "", "Vlr a receber 70%", String.format("%.2f", valorReceber70), "" });
+	    model.addRow(new Object[] { "", "", "", "", "", "Vlr a receber 110%", String.format("%.2f", valorReceber110), "" });
+	    model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
+
+	    diasTrabalhado = 0;
+	    model.fireTableDataChanged();
+	    diasTrabalhado = 0;
+	}
+
+
+//	public void listar(LocalDateTime startDate, LocalDateTime endDate) {
+//		limparTabela();
+//		List<JornadaTrabalho> jornadas = jornadaController.listarPorPeriodo(startDate, endDate);
+//
+//		for (JornadaTrabalho jornada : jornadas) {
+//			diasTrabalhado++;
+//			porcentagem = jornada.getPorcentagem();
+//
+//			int idJornada = jornada.getId();
+//			datJornada = jornada.getDatJornada();
+//			startJornada = jornada.getStartJornada().toLocalDateTime();
+//			endJornada = jornada.getEndJornada().toLocalDateTime();
+//			startAlmoco = jornada.getStartAlmoco().toLocalDateTime();
+//			endAlmoco = jornada.getEndAlmoco().toLocalDateTime();
+//
+//			Duration totalJornada = Duration.between(startJornada, endJornada);
+//			Duration totalAlmoco = Duration.between(startAlmoco, endAlmoco);
+//
+//			if (totalAlmoco.compareTo(Duration.ofHours(1)) > 0) {
+//				// Se for maior, ajustar a duração do almoço para 1 hora
+//				totalAlmoco = Duration.ofHours(1);
+//			}
+//
+//			Duration tempoTrabalhado = totalJornada.minus(totalAlmoco);
+//			Duration horaPadrao = Duration.ofHours(8).plusMinutes(48);
+//
+//			if (porcentagem == 70) {
+//				hora70 = true;
+//				resultado = tempoTrabalhado.minus(horaPadrao);
+//				horaExtra70 = horaExtra70.plus(resultado);
+//			}
+//
+//			if (porcentagem == 110) {
+//				hora110 = true;
+//				resultado = tempoTrabalhado;
+//				horaExtra110 = horaExtra110.plus(resultado);
+//			}
+//
+//			// Verificar se o horário de início e fim do almoço é "00:00"
+//			if (startAlmoco.equals(LocalTime.MIDNIGHT) && endAlmoco.equals(LocalTime.MIDNIGHT)) {
+//				// Se for, ajustar a duração da jornada para o horário de trabalho efetivo
+//				resultado = totalJornada.minus(Duration.between(startJornada, endJornada));
+//				System.out.println("Resultado: " + resultado);
+//			}
+//
+//			// Verificar se a duração é zero
+//			if (resultado.isZero() || resultado.isNegative()) {
+//
+//				// Definir "N/A" na tabela quando a duração for zero
+//				model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
+//						utils.formatarHora(startJornada), utils.formatarHora(endJornada),
+//						utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), "N/A", porcentagem });
+//			} else {
+//				// Caso contrário, formatar a duração como hora:minuto e definir na tabela
+//				long minutosParte = resultado.toMinutes() % 60;
+//
+//				String formattedDuration = String.format("%02d:%02d", resultado.toHours(), minutosParte);
+//
+//				System.out.println();
+//				model.addRow(new Object[] { idJornada, utils.converterFormatoDate(datJornada),
+//						utils.formatarHora(startJornada), utils.formatarHora(endJornada),
+//						utils.formatarHora(startAlmoco), utils.formatarHora(endAlmoco), formattedDuration,
+//						porcentagem });
+//			}
+//		}
+//
+//		model.addRow(new Object[] { "***************", "***************", "**************", "***************",
+//				"***************", "***************", "***************", "***************" });
+//
+//		if (hora70) {
+//			model.addRow(new Object[] { "", "", "", "", "", "Hr 70%", utils.formatarDuration(horaExtra70), "" });
+//
+//		}
+//
+//		if (hora110) {
+//			model.addRow(new Object[] { "", "", "", "", "", "Hr 110%", utils.formatarDuration(horaExtra110), "" });
+//
+//		} else {
+//			model.addRow(new Object[] { "", "", "", "", "", "Hr 110%", "00:00", "" });
+//
+//		}
+//		Duration totalHora = Duration.ZERO;
+//
+//		totalHora = horaExtra110.plus(horaExtra70);
+//
+//		String msg = "";
+//		if (diasTrabalhado > 1) {
+//			msg = " dias";
+//		} else {
+//			msg = " dia";
+//		}
+//
+//		model.addRow(new Object[] { "Dias trabalhado", diasTrabalhado + msg, "", "", "", "Total hora",
+//				utils.formatarDuration(totalHora), "" });
+//		double valorReceber70 = 22.12 * horaExtra110.toHours();
+//		double valorReceber110 = 28.15 * horaExtra70.toHours();
+//		double totalReceber = valorReceber70 + valorReceber110;
+//
+//		model.addRow(new Object[] { "", "", "", "", "", "", "", "" });
+//
+//		model.addRow(
+//				new Object[] { "", "", "", "", "", "Vlr a receber 70%", String.format("%.2f", valorReceber70), "" });
+//		model.addRow(
+//				new Object[] { "", "", "", "", "", "Vlr a receber 110%", String.format("%.2f", valorReceber110), "" });
+//		model.addRow(new Object[] { "", "", "", "", "", "Total a receber", String.format("%.2f", totalReceber), "" });
+//		diasTrabalhado = 0;
+//		model.fireTableDataChanged();
+//		diasTrabalhado = 0;
+//	}
+
 	String nomeTable = "banco_de_horas";
 	String nomeBanco = "jornadadiaria";
-	
+
 	public String getTable() {
 		return nomeTable;
 	}
-	
-	public String getBanco() { 
+
+	public String getBanco() {
 		return nomeBanco;
 	}
 
@@ -529,7 +663,6 @@ private JButton btnRefresh;
 		modelo.setRowCount(0);
 		for (JornadaTrabalho jornada : jornadas) {
 
-			int idJornada = jornada.getId();
 			Date datJornada = jornada.getDatJornada();
 			startJornada = jornada.getStartJornada().toLocalDateTime();
 			endJornada = jornada.getEndJornada().toLocalDateTime();
@@ -607,6 +740,7 @@ private JButton btnRefresh;
 		dateChooser1.setEnabled(enabled);
 		dateChooser2.setEnabled(enabled);
 		btnGerarPdf.setEnabled(enabled);
+		
 	}
 
 	private void limparCamposData() {
@@ -681,7 +815,4 @@ private JButton btnRefresh;
 		return dados;
 	}
 
-	
-
-	
 }
